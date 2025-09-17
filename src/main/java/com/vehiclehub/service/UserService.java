@@ -33,16 +33,25 @@ public class UserService {
     
     @Transactional
     public void registerUser(RegisterRequest request) {
-    	if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-    	    throw new RuntimeException("Email already exists");
-    	}
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
 
         User user = new User();
-        user.setUsername(request.getUsername());
+        user.setName(request.getName());
+        user.setGender(request.getGender());
+        user.setTitle(request.getTitle());
+        user.setDob(request.getDob());
         user.setEmail(request.getEmail());
+        user.setMobileNumber(request.getMobileNumber());
+        user.setCountry(request.getCountry());
+        user.setCity(request.getCity());
+        user.setState(request.getState());
+        user.setPinCode(request.getPinCode());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
     }
+
 
     public String authenticate(LoginRequest request) {
         try {
@@ -52,8 +61,7 @@ public class UserService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             return jwtTokenProvider.generateToken(authentication);
         } catch (Exception ex) {
-            // Log here
-            throw ex; // or wrap and throw a custom exception
+            throw ex;
         }
     }
 

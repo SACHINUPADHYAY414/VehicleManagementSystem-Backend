@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vehiclehub.DTO.JwtResponse;
 import com.vehiclehub.DTO.LoginRequest;
+import com.vehiclehub.DTO.LoginResponse;
 import com.vehiclehub.DTO.RegisterRequest;
+import com.vehiclehub.entity.User;
 import com.vehiclehub.service.UserService;
 
 @RestController
@@ -29,17 +31,28 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginRequest> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         String token = userService.authenticate(request);
-        
-        request.setToken(token);
-        request.setMessage("Login successful");
-        request.setUsername("ExampleUser");
 
-        request.setPassword(null);
+        User user = userService.getUserByEmailOrName(request.getEmail(), request.getName());
 
-        return ResponseEntity.ok(request);
+        LoginResponse response = new LoginResponse();
+        response.setToken(token);
+        response.setMessage("Login successful");
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setGender(user.getGender());
+        response.setTitle(user.getTitle());
+        response.setDob(user.getDob() != null ? user.getDob() : null);
+        response.setMobileNumber(user.getMobileNumber());
+        response.setCountry(user.getCountry());
+        response.setCity(user.getCity());
+        response.setState(user.getState());
+        response.setPinCode(user.getPinCode());
+
+        return ResponseEntity.ok(response);
     }
+
 
 
     @ExceptionHandler(BadCredentialsException.class)

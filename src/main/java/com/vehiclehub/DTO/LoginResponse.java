@@ -1,21 +1,24 @@
 package com.vehiclehub.DTO;
 
-import lombok.*;
 import java.time.LocalDate;
+
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterRequest {
+public class LoginResponse {
+    private String token;
+    private String message;
+    private String username;
     private String name;
+    private String email;
     private String gender;
     private String title;
     private LocalDate dob;
-    private String email;
     private String mobileNumber;
     private String country;
     private String city;
     private String state;
     private String pinCode;
-    private String password;
 }
