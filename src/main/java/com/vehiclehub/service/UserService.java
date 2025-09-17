@@ -30,7 +30,7 @@ public class UserService {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-    
+
     @Transactional
     public void registerUser(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -52,7 +52,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-
     public String authenticate(LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -65,4 +64,9 @@ public class UserService {
         }
     }
 
+    // Add this method to fetch the user by email
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
 }

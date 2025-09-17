@@ -34,7 +34,8 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         String token = userService.authenticate(request);
 
-        User user = userService.getUserByEmailOrName(request.getEmail(), request.getName());
+        // Use the getUserByEmail method to fetch the user by email
+        User user = userService.getUserByEmail(request.getEmail());
 
         LoginResponse response = new LoginResponse();
         response.setToken(token);
@@ -53,8 +54,6 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-
-
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentials(BadCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
@@ -64,6 +63,4 @@ public class AuthController {
     public ResponseEntity<String> handleRuntimeException(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
-    
 }
-
