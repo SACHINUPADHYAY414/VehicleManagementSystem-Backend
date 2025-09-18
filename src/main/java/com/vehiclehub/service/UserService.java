@@ -1,6 +1,7 @@
 package com.vehiclehub.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
 @Service
 public class UserService {
 
@@ -33,6 +35,7 @@ public class UserService {
 
     @Transactional
     public void registerUser(RegisterRequest request) {
+        // Optional pre-check; this is not race condition safe but improves UX
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
@@ -49,7 +52,13 @@ public class UserService {
         user.setState(request.getState());
         user.setPinCode(request.getPinCode());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        userRepository.save(user);
+
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            // This usually means a unique constraint violation, e.g. email already exists
+            throw new RuntimeException("Email already exists");
+        }
     }
 
     public String authenticate(LoginRequest request) {
@@ -60,11 +69,11 @@ public class UserService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             return jwtTokenProvider.generateToken(authentication);
         } catch (Exception ex) {
-            throw ex;
+            throw new RuntimeException("Invalid email or password");
         }
     }
 
-    // Add this method to fetch the user by email
+    // Method to fetch user by email
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));

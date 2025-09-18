@@ -26,4 +26,6 @@ public class Vehicle {
 
     @Enumerated(EnumType.STRING)
     private VehicleStatus status;
+    
+    private String imageUrl;
 }

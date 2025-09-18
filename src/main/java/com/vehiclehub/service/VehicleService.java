@@ -21,7 +21,36 @@ public class VehicleService {
     @Autowired
     private DealerService dealerService;
 
-    public Vehicle saveVehicle(Vehicle vehicle) {
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    // Create Vehicle with Image
+    public Vehicle saveVehicleWithImage(VehicleRequestDto dto) {
+        Dealer dealer = dealerService.getDealerById(dto.getDealerId());
+        if (dealer == null) {
+            throw new RuntimeException("Dealer not found with id: " + dto.getDealerId());
+        }
+
+        Vehicle vehicle = new Vehicle();
+        vehicle.setModel(dto.getModel());
+        vehicle.setPrice(dto.getPrice());
+        vehicle.setYear(dto.getYear());
+
+        try {
+            VehicleStatus status = VehicleStatus.valueOf(dto.getStatus().toUpperCase());
+            vehicle.setStatus(status);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid vehicle status: " + dto.getStatus());
+        }
+
+        vehicle.setDealer(dealer);
+
+        // Upload image if provided
+        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
+            String imageUrl = cloudinaryService.uploadFile(dto.getImage());
+            vehicle.setImageUrl(imageUrl);
+        }
+
         return vehicleRepository.save(vehicle);
     }
 
@@ -34,6 +63,7 @@ public class VehicleService {
         return vehicleRepository.findAll();
     }
 
+    // Update Vehicle (with optional image update)
     public Vehicle updateVehicle(Long id, VehicleRequestDto dto) {
         Vehicle vehicle = getVehicle(id);
 
@@ -44,6 +74,7 @@ public class VehicleService {
 
         vehicle.setModel(dto.getModel());
         vehicle.setPrice(dto.getPrice());
+        vehicle.setYear(dto.getYear());
 
         try {
             VehicleStatus status = VehicleStatus.valueOf(dto.getStatus().toUpperCase());
@@ -53,6 +84,12 @@ public class VehicleService {
         }
 
         vehicle.setDealer(dealer);
+
+        // Replace image if new one uploaded
+        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
+            String imageUrl = cloudinaryService.uploadFile(dto.getImage());
+            vehicle.setImageUrl(imageUrl);
+        }
 
         return vehicleRepository.save(vehicle);
     }
@@ -76,7 +113,8 @@ public class VehicleService {
                 vehicle.getPrice(),
                 vehicle.getYear(),
                 vehicle.getStatus(),
-                vehicle.getDealer() != null ? vehicle.getDealer().getId() : null
+                vehicle.getDealer() != null ? vehicle.getDealer().getId() : null,
+                vehicle.getImageUrl()
         );
     }
 

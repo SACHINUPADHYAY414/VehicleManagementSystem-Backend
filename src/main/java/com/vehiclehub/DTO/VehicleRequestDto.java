@@ -1,5 +1,7 @@
 package com.vehiclehub.DTO;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -23,4 +25,7 @@ public class VehicleRequestDto {
 
     @NotNull(message = "Dealer ID is required")
     private Long dealerId;
+    
+
+    private MultipartFile image;
 }

@@ -2,16 +2,12 @@ package com.vehiclehub.controller;
 
 import com.vehiclehub.DTO.VehicleRequestDto;
 import com.vehiclehub.DTO.VehicleResponseDto;
-import com.vehiclehub.entity.Dealer;
 import com.vehiclehub.entity.Vehicle;
-import com.vehiclehub.entity.VehicleStatus;
-import com.vehiclehub.service.DealerService;
 import com.vehiclehub.service.VehicleService;
-
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -21,32 +17,10 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
 
-    @Autowired
-    private DealerService dealerService;
-
-    // Create Vehicle
-    @PostMapping
-    public VehicleResponseDto createVehicle(@Valid @RequestBody VehicleRequestDto dto) {
-        Dealer dealer = dealerService.getDealerById(dto.getDealerId());
-        if (dealer == null) {
-            throw new RuntimeException("Dealer not found with id: " + dto.getDealerId());
-        }
-
-        Vehicle vehicle = new Vehicle();
-        vehicle.setModel(dto.getModel());
-        vehicle.setPrice(dto.getPrice());
-        vehicle.setYear(dto.getYear());
-
-        try {
-            VehicleStatus status = VehicleStatus.valueOf(dto.getStatus().toUpperCase());
-            vehicle.setStatus(status);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid vehicle status: " + dto.getStatus());
-        }
-
-        vehicle.setDealer(dealer);
-
-        Vehicle savedVehicle = vehicleService.saveVehicle(vehicle);
+    // Create Vehicle (with image)
+    @PostMapping(consumes = {"multipart/form-data"})
+    public VehicleResponseDto createVehicle(@ModelAttribute @Valid VehicleRequestDto dto) {
+        Vehicle savedVehicle = vehicleService.saveVehicleWithImage(dto);
         return vehicleService.mapToDto(savedVehicle);
     }
 
@@ -64,9 +38,10 @@ public class VehicleController {
         return vehicleService.mapToDto(vehicle);
     }
 
-    // Update Vehicle
-    @PutMapping("/{id}")
-    public VehicleResponseDto updateVehicle(@PathVariable Long id, @Valid @RequestBody VehicleRequestDto dto) {
+    // Update Vehicle (with optional image update)
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public VehicleResponseDto updateVehicle(@PathVariable Long id,
+                                            @ModelAttribute @Valid VehicleRequestDto dto) {
         Vehicle updatedVehicle = vehicleService.updateVehicle(id, dto);
         return vehicleService.mapToDto(updatedVehicle);
     }

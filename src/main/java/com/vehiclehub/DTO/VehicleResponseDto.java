@@ -15,4 +15,7 @@ public class VehicleResponseDto {
     private Integer year;
     private VehicleStatus status;
     private Long dealerId;
+    private String imageUrl;
+
 }
+
