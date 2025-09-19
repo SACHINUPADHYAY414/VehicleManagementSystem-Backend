@@ -8,6 +8,7 @@ import com.vehiclehub.entity.VehicleStatus;
 import com.vehiclehub.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ public class VehicleService {
     private CloudinaryService cloudinaryService;
 
     // Create Vehicle with Image
+    @Transactional
     public Vehicle saveVehicleWithImage(VehicleRequestDto dto) {
         Dealer dealer = dealerService.getDealerById(dto.getDealerId());
         if (dealer == null) {
@@ -54,16 +56,19 @@ public class VehicleService {
         return vehicleRepository.save(vehicle);
     }
 
+    @Transactional(readOnly = true)
     public Vehicle getVehicle(Long vehicleId) {
         return vehicleRepository.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
     }
 
+    @Transactional(readOnly = true)
     public List<Vehicle> getAllVehicles() {
         return vehicleRepository.findAll();
     }
 
     // Update Vehicle (with optional image update)
+    @Transactional
     public Vehicle updateVehicle(Long id, VehicleRequestDto dto) {
         Vehicle vehicle = getVehicle(id);
 
@@ -94,11 +99,13 @@ public class VehicleService {
         return vehicleRepository.save(vehicle);
     }
 
+    @Transactional
     public void deleteVehicle(Long id) {
         Vehicle vehicle = getVehicle(id);
         vehicleRepository.delete(vehicle);
     }
 
+    @Transactional
     public Vehicle updateVehicleStatus(Long vehicleId, VehicleStatus status) {
         Vehicle vehicle = getVehicle(vehicleId);
         vehicle.setStatus(status);

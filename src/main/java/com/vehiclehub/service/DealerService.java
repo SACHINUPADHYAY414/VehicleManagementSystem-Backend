@@ -3,6 +3,8 @@ package com.vehiclehub.service;
 import com.vehiclehub.entity.Dealer;
 import com.vehiclehub.repository.DealerRepository;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ public class DealerService {
         return dealerRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public List<Dealer> getAllDealers() {
         return dealerRepository.findAll();
     }
