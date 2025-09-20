@@ -53,6 +53,7 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
             "https://vehiclehubs.vercel.app",
+            "https://novamotor.vercel.app",
             "http://localhost:3000"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
